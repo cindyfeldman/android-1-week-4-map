@@ -22,14 +22,14 @@ public class DataSources {
 
     private static DataSources instance;
 
-//    private DataApi dataApi;
+   private DataApi dataApi;
 
     public DataSources() {
-//        this.dataApi = new Retrofit.Builder()
-//                .baseUrl("https://ucsd-ext-android-rja-1.firebaseio.com/apps/snap/")
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build()
-//                .create(DataApi.class);
+        this.dataApi = new Retrofit.Builder()
+                .baseUrl("https://ucsd-ext-android-rja-1.firebaseio.com/apps/snap/")//base where info came from
+                .addConverterFactory(GsonConverterFactory.create())//converts info into code
+                .build()
+                .create(DataApi.class);
     }
 
 
@@ -41,29 +41,50 @@ public class DataSources {
     }
 
     public void getStaticUserLocations(Callback<List<UserLocationData>> callback) {
-//        dataApi.getStaticUserLocations().enqueue(new retrofit2.Callback<List<UserLocationData>>() {
-//            @Override
-//            public void onResponse(@NonNull Call<List<UserLocationData>> call, @NonNull Response<List<UserLocationData>> response) {
-//                if(response.isSuccessful())
-//                    callback.onDataFetched(response.body());
-//                else
-//                    callback.onDataFetched(Collections.emptyList());
-//            }
-//
-//            @Override
-//            public void onFailure(@NonNull Call<List<UserLocationData>> call, @NonNull Throwable t) {
-//                Log.e(TAG, "DataApi error", t);
-//                callback.onDataFetched(Collections.emptyList());
-//            }
-//        });
-    }
 
+        dataApi.getStaticUserLocations().enqueue(new retrofit2.Callback<List<UserLocationData>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<UserLocationData>> call, @NonNull Response<List<UserLocationData>> response) {
+                if(response.isSuccessful())
+                    callback.onDataFetched(response.body());
+                else
+                    callback.onDataFetched(Collections.emptyList());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<UserLocationData>> call, @NonNull Throwable t) {
+                Log.e(TAG, "DataApi error", t);
+                callback.onDataFetched(Collections.emptyList());
+            }
+        });
+    }
+public void getAppName(Callback<String>  callBack){
+        dataApi.getAppName().enqueue(new retrofit2.Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if(response.isSuccessful()){
+                    callBack.onDataFetched(response.body());
+
+                }
+                else{
+                    callBack.onDataFetched("faliure");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+        callBack.onDataFetched("faliure");
+            }
+        });
+}
     public interface Callback<T> {
         void onDataFetched(T data);
     }
 
-//    private interface DataApi {
-//        @GET("static_user_locations.json")
-//        Call<List<UserLocationData>> getStaticUserLocations();
-//    }
+    private interface DataApi {
+        @GET("static_user_locations.json")
+        Call<List<UserLocationData>> getStaticUserLocations();
+       @GET("app_name.json" )
+        Call<String> getAppName();
+    }
 }
