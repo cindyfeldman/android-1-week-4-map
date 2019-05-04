@@ -19,6 +19,7 @@ public class UserLocationData {
     private String userId;
     @SerializedName("user_name")
     private String userName;
+    @RemoveFromJson
 
     public UserLocationData(String color, double latitude, double longitude, String locationName, String userId, String userName) {
         this.color = color;
@@ -53,4 +54,7 @@ public class UserLocationData {
         return userName;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

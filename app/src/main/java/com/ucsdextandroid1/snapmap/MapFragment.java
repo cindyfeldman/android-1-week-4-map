@@ -1,13 +1,17 @@
 package com.ucsdextandroid1.snapmap;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,7 +44,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final int ZOOM_LEVEL = 7;
 
     private MapView mapView;
-    private @Nullable GoogleMap googleMap;
+    private @Nullable
+    GoogleMap googleMap;
     private UserLocationsAdapter adapter;
 
     private Drawable vectorDrawable;
@@ -72,17 +77,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         mapView = root.findViewById(R.id.fm_map);
         mapView.onCreate(savedInstanceState);
-     mapView.getMapAsync(this);
-     recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),RecyclerView.HORIZONTAL,false));
-     UserLocationsAdapter adapter = new UserLocationsAdapter();
-     recyclerView.setAdapter(adapter);
-     DataSources.getInstance().getStaticUserLocations(new DataSources.Callback<List<UserLocationData>>() {
-         @Override
-         public void onDataFetched(List<UserLocationData> data) {
-             adapter.setItems(data);
-         }
-     });
+        mapView.getMapAsync(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
+        adapter = new UserLocationsAdapter();
+        recyclerView.setAdapter(adapter);
+        updateAdapter();
+        updateUserLocation();
         return root;
+    }
+
+    private void updateAdapter() {
+        DataSources.getInstance().getActiveUserLocations(new DataSources.Callback<List<UserLocationData>>() {
+            @Override
+            public void onDataFetched(List<UserLocationData> data) {
+                adapter.setItems(data);
+            }
+        });
+    }
+
+    private void updateUserLocation() {
+        String userID = "user_05";
+        UserLocationData locationData = new UserLocationData(
+                "#2BD5C4",
+                41.87,
+                12.56,
+                "Italy",
+                userID,
+                "Cindy F"
+        );
+
+        DataSources.getInstance().updateUser(userID, locationData, new DataSources.Callback<UserLocationData>() {
+            @Override
+            public void onDataFetched(UserLocationData data) {
+                Toast.makeText(getContext(), data != null ? "Success" : "failure", Toast.LENGTH_LONG)
+                        .show();
+                if (data != null) {
+                    updateAdapter();
+                }
+            }
+        });
     }
 
     @Override
@@ -149,7 +182,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(new LatLng(38,24));
+        markerOptions.position(new LatLng(38, 24));
         markerOptions.title("Athens, Greece");
         googleMap.addMarker(markerOptions);
 
